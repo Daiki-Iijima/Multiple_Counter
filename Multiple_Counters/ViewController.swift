@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import Foundation
 
 class ViewController: UIViewController {
 
@@ -35,8 +36,13 @@ class ViewController: UIViewController {
     @IBOutlet weak var CountName6: UITextField!
     @IBOutlet weak var CountName7: UITextField!
     
-    //json保存用構造体
-    var jsonObj = Array<Dictionary<String,Int>>()
+    //Json変換用の構造体
+    struct CountData: Codable {
+        var Name : String
+        var Count : Int
+    }
+    
+    var arrayDatas: Array<CountData> = Array(repeating: CountData(Name: "",Count: 0), count: 7)
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -101,37 +107,65 @@ class ViewController: UIViewController {
         arrayName[5] = CountName6.text!
         arrayName[6] = CountName7.text!
         
-        print(arrayName);
-        print(arrayCount);
-        for (index, element) in arrayName.enumerated()
-        {
-            jsonObj.append([element : arrayCount[index]]);
-        }
+        //print(arrayName)
+        //print(arrayCount)
+        // hobbyひとつめのメンバを作成
+        var data1 = Dictionary<String, Any>()
+        data1["name"] = arrayName[0]
+        data1["count"] = arrayCount[0]
+        var data2 = Dictionary<String, Any>()
+        data2["name"] = arrayName[1]
+        data2["count"] = arrayCount[1]
+        var data3 = Dictionary<String, Any>()
+        data3["name"] = arrayName[2]
+        data3["count"] = arrayCount[2]
+        var data4 = Dictionary<String, Any>()
+        data4["name"] = arrayName[3]
+        data4["count"] = arrayCount[3]
+        var data5 = Dictionary<String, Any>()
+        data5["name"] = arrayName[4]
+        data5["count"] = arrayCount[4]
+        var data6 = Dictionary<String, Any>()
+        data6["name"] = arrayName[5]
+        data6["count"] = arrayCount[5]
+        var data7 = Dictionary<String, Any>()
+        data7["name"] = arrayName[6]
+        data7["count"] = arrayCount[6]
         
-        do {
-            let jsonData = try JSONSerialization.data(withJSONObject: jsonObj, options: [])
+        var dataArray = Array<Dictionary<String, Any>>()
+        dataArray.append(data1)
+        dataArray.append(data2)
+        dataArray.append(data3)
+        dataArray.append(data4)
+        dataArray.append(data5)
+        dataArray.append(data6)
+        dataArray.append(data7)
+        
+        do
+        {
+            let jsonData = try JSONSerialization.data(withJSONObject: dataArray)
+            // JSONデータを文字列に変換
             let jsonStr = String(bytes: jsonData, encoding: .utf8)!
-            print(jsonStr)  // 生成されたJSON文字列 => {"Name":"Taro"}
+            //print(jsonStr)
             
+            do {
+                // JSON文字列をData型に変換
+                let personalData: Data =  jsonStr.data(using: String.Encoding.utf8)!
             
+                // パースする
+                let items = try JSONSerialization.jsonObject(with: personalData) as! Array<Dictionary<String, Any>>
+             
+                for i in 0...6
+                {
+                print(items[i]["name"] as! String)
+                print(items[i]["count"] as! Int)
+                }
+                } catch {
+                print(error)
+            }
             
-//
-//            if let dir = FileManager.default.urls( for: .documentDirectory, in: .userDomainMask ).first
-//            {
-//                let filePath = dir.appendingPathComponent( "data.json" )
-//
-//                do {
-//                    print("testing")
-//                    print("filePath: \(filePath)")
-//                    try jsonStr.write(to: filePath, atomically: true, encoding: .utf8)
-//                } catch {
-//                    print("error")
-//                }
-//            }
-            
-            
-        } catch let error {
-            print(error)
+        } catch (let e) {
+            print(e)
         }
         
         
