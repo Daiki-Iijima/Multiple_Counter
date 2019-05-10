@@ -9,7 +9,7 @@
 import UIKit
 import Foundation
 
-class ViewController: UIViewController {
+class ViewController: UIViewController, UITextFieldDelegate {
 
     //Int型、string型の配列を作る
     //引数で初期化
@@ -42,11 +42,79 @@ class ViewController: UIViewController {
         var Count : Int
     }
     
-    var arrayDatas: Array<CountData> = Array(repeating: CountData(Name: "",Count: 0), count: 7)
+    var arrayDatas: Array<Dictionary<String, Any>> = Array()
+    
+    let SaveDataPath = NSHomeDirectory()+"/Documents/data.json"
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
+        CountName1.delegate = self
+        CountName2.delegate = self
+        CountName3.delegate = self
+        CountName4.delegate = self
+        CountName5.delegate = self
+        CountName6.delegate = self
+        CountName7.delegate = self
+        //保存していたJsonをロード
+        do {
+            let getData=getFileData(SaveDataPath)
+            
+            // パースする
+            let items = try JSONSerialization.jsonObject(with: getData!) as! Array<Dictionary<String, Any>>
+            
+            for i in 0...6
+            {
+                arrayName[i] = items[i]["name"] as! String
+                arrayCount[i] = items[i]["count"] as! Int
+                
+                print(items[i]["name"] as! String)
+                print(items[i]["count"] as! Int)
+            
+            }
+            
+            CountLabel1.text = String(arrayCount[0])
+            CountLabel2.text = String(arrayCount[1])
+            CountLabel3.text = String(arrayCount[2])
+            CountLabel4.text = String(arrayCount[3])
+            CountLabel5.text = String(arrayCount[4])
+            CountLabel6.text = String(arrayCount[5])
+            CountLabel7.text = String(arrayCount[6])
+            
+            CountName1.text = String(arrayName[0])
+            CountName2.text = String(arrayName[1])
+            CountName3.text = String(arrayName[2])
+            CountName4.text = String(arrayName[3])
+            CountName5.text = String(arrayName[4])
+            CountName6.text = String(arrayName[5])
+            CountName7.text = String(arrayName[6])
+            
+        } catch {
+            print(error)
+        }
+    }
+    
+    
+    //ファイルのロード
+    func getFileData(_ filePath: String) -> Data? {
+        let fileData: Data?
+        do {
+            fileData = try Data(contentsOf: URL(fileURLWithPath: filePath))
+        } catch {
+            // ファイルデータの取得でエラーの場合
+            fileData = nil
+        }
+        return fileData
+    }
+    
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+    }
+    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        // キーボードを閉じる
+        textField.resignFirstResponder()
+        return true
     }
     
     //カウントアップ用ボタンイベント
@@ -109,60 +177,31 @@ class ViewController: UIViewController {
         
         //print(arrayName)
         //print(arrayCount)
-        // hobbyひとつめのメンバを作成
-        var data1 = Dictionary<String, Any>()
-        data1["name"] = arrayName[0]
-        data1["count"] = arrayCount[0]
-        var data2 = Dictionary<String, Any>()
-        data2["name"] = arrayName[1]
-        data2["count"] = arrayCount[1]
-        var data3 = Dictionary<String, Any>()
-        data3["name"] = arrayName[2]
-        data3["count"] = arrayCount[2]
-        var data4 = Dictionary<String, Any>()
-        data4["name"] = arrayName[3]
-        data4["count"] = arrayCount[3]
-        var data5 = Dictionary<String, Any>()
-        data5["name"] = arrayName[4]
-        data5["count"] = arrayCount[4]
-        var data6 = Dictionary<String, Any>()
-        data6["name"] = arrayName[5]
-        data6["count"] = arrayCount[5]
-        var data7 = Dictionary<String, Any>()
-        data7["name"] = arrayName[6]
-        data7["count"] = arrayCount[6]
         
-        var dataArray = Array<Dictionary<String, Any>>()
-        dataArray.append(data1)
-        dataArray.append(data2)
-        dataArray.append(data3)
-        dataArray.append(data4)
-        dataArray.append(data5)
-        dataArray.append(data6)
-        dataArray.append(data7)
+        for i in 0...6
+        {
+            var data = Dictionary<String, Any>()
+            data["name"] = arrayName[i]
+            data["count"] = arrayCount[i]
+            arrayDatas.append(data)
+        }
+        
         
         do
         {
-            let jsonData = try JSONSerialization.data(withJSONObject: dataArray)
+            let jsonData = try JSONSerialization.data(withJSONObject: arrayDatas)
             // JSONデータを文字列に変換
-            let jsonStr = String(bytes: jsonData, encoding: .utf8)!
-            //print(jsonStr)
-            
+            var jsonStr = String(bytes: jsonData, encoding: .utf8)!
+           
+            //Jsonを保存
             do {
-                // JSON文字列をData型に変換
-                let personalData: Data =  jsonStr.data(using: String.Encoding.utf8)!
-            
-                // パースする
-                let items = try JSONSerialization.jsonObject(with: personalData) as! Array<Dictionary<String, Any>>
-             
-                for i in 0...6
-                {
-                print(items[i]["name"] as! String)
-                print(items[i]["count"] as! Int)
-                }
-                } catch {
-                print(error)
+                try jsonStr.write(toFile: SaveDataPath, atomically: true, encoding: String.Encoding.utf8)
+            } catch let error as NSError {
+                print("failed to write: \(error)")
             }
+            
+            
+            
             
         } catch (let e) {
             print(e)
