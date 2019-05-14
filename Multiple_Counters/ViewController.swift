@@ -36,6 +36,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
     @IBOutlet weak var CountName6: UITextField!
     @IBOutlet weak var CountName7: UITextField!
     
+    @IBOutlet weak var CountTableView: UITableView!
     //Json変換用の構造体
     struct CountData: Codable {
         var Name : String
@@ -92,6 +93,10 @@ class ViewController: UIViewController, UITextFieldDelegate {
         } catch {
             print(error)
         }
+        
+        // テーブルビューのデータソースとしてViewControllerを指定。（storyboardで設定しても良い。）
+        self.CountTableView.dataSource = self
+        
     }
     
     
@@ -200,17 +205,29 @@ class ViewController: UIViewController, UITextFieldDelegate {
                 print("failed to write: \(error)")
             }
             
-            
-            
-            
         } catch (let e) {
             print(e)
         }
+    }
+    
+}
+
+    // - ViewControllerにUITableViewDataSourceを準拠させる。
+    // - 最低限必要なメソッドを実装する。
+extension ViewController: UITableViewDataSource {
+        // cellを返す。
+        func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+            let cell = UITableViewCell()
+            cell.textLabel?.text = "section:[\(indexPath.section)], row:[\(indexPath.row)]"
+            return cell
+        }
         
-        
-        
+        //セルの数をいくつにするか。
+        func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+            return 100
+        }
     }
     
     
-}
+
 
